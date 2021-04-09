@@ -61,20 +61,21 @@ browserPromise.then(function(browserInstance)
         let warmupclick = waitAndClick("a[data-attr1='warmup']");
         return warmupclick;
 
-    }).then(function()
-    {
-        //get current tab url.
-        return gtab.url();
-    }).then(function(url)
-    {
-        // code[0] is stored in questionObj. code content objects with qName and soln as a keys.
+    }).then(function () {
+        let url = gtab.url();
         let questionObj = code[0];
-
-        //Solve hackerrank question function.
-        questionSolver(url, questionObj.soln,questionObj.qName);
-    }).
-    //catch is used to handle error
-    catch(function (err) {
+        let fqsp = questionSolver(url, questionObj.soln, questionObj.qName);
+        // new production level -> async await 
+        for (let i = 1; i < code.length; i++) {
+            fqsp = fqsp.then(function () {
+                return questionSolver(url, code[i].soln,code[i].qName);
+            })
+        }
+        return fqsp;
+    }).then(function () {
+        console.log("All questions submitted");
+    })
+    .catch(function (err) {
         console.log(err);
     })
 
@@ -172,25 +173,4 @@ function questionSolver(modulepageUrl, code, questionName) {
     })
 }
 
-// function settingHandler() {
-//     return new Promise(function (resolve, reject) {
 
-//         // wait click
-//         let settingClickPromise = waitAndClick("button[aria-label='Editor Settings']");
-//         settingClickPromise
-//             .then(function () {
-//                 let disableButtonClickPromise = waitAndClick("button[aria-label='Disable Autocomplete']");
-//                 return disableButtonClickPromise;
-//             }).then(function () {
-//                 // click on setting button
-//                 let settingIsClickedpromise = gtab.click("button[aria-label='Editor Settings']");
-//                 return settingIsClickedpromise;
-//             }).then(function () {
-//                 resolve();
-//             }).catch(function () {
-//                 resolve();
-//             })
-//         // autocomplete -> wait ,click
-
-//     })
-// }
